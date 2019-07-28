@@ -9,7 +9,8 @@ import axios from "axios";
                 url: `https://api.github.com/search/users?q=+location:${searchText}&sort=stars&order=asc&page=1&per_page=10`,
                 // url: `https://api.github.com/search/hello?124`, to simulate Errors .
                 headers: {
-                    Authorization: `Bearer c4dbea732fe41bbee4f8e452772ce0a44294285f`,
+                    //Authorization: `Bearer aa424f6fcf3d631e3d2832c9220dcfa6afb74473`,
+                    Authorization: `Bearer 150b1d0fcf2ced16a9c8f05fc0eff556438b4ee2`,
                     "Content-Type": "application/json"
                 }
             });
@@ -92,6 +93,11 @@ import axios from "axios";
             headers: {
                 Authorization: `Bearer c4dbea732fe41bbee4f8e452772ce0a44294285f`,
                 "Content-Type": "application/json"
+            },
+            auth: {
+                user: 'c4dbea732fe41bbee4f8e452772ce0a44294285f',
+                pass: 'x-oauth-basic',
+                sendImmediately: true
             }
         });
     }
