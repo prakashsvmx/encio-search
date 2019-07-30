@@ -12,7 +12,7 @@ export default  class GitAuthUtils {
 
 	static  getUrlVars =()=>{
 		const vars = {};
-		const parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+		window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
 			vars[key] = value;
 		});
 		return vars;

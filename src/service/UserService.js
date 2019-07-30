@@ -1,4 +1,5 @@
 import axios from "axios";
+import { GIT_AUTH_CODE_KEY } from 'utils/Constants';
 
  class UserService {
 
@@ -6,7 +7,7 @@ import axios from "axios";
 
     	const accessToken = await  UserService.getAuthToken();
 
-	    let userDetails=''
+	    let userDetails={};
         try {
 
         	if(!accessToken ){
@@ -17,13 +18,6 @@ import axios from "axios";
 			        isInComplete: false,
 			        message: 'Invalid Token',
 		        };
-
-		        const uri = window.location.toString();
-		        let clean_uri = uri;
-		        if (uri.indexOf("?") > 0) {
-			        clean_uri = uri.substring(0, uri.indexOf("?"));
-		        }
-		        window.location.replace(clean_uri);
 
 		        return  userDetails;
 	        }
@@ -139,7 +133,7 @@ import axios from "axios";
 
     static async getAuthToken (){
 
-	   const authCode = localStorage.getItem('git_auth_code');
+	   const authCode = localStorage.getItem(GIT_AUTH_CODE_KEY);
 
 	   if(authCode) {
 		   let data = new FormData()
@@ -154,7 +148,7 @@ import axios from "axios";
 						   'Content-Type': 'application/json',
 						   'Accept': 'application/json'
 				   },
-				   url: `https://cors-anywhere.herokuapp.com/https://github.com/login/oauth/access_token`,
+				   url: `https://sph-cors-anywhere.herokuapp.com/https://github.com/login/oauth/access_token`,
 
 				   data: data,
 				   transformResponse: [(data) => {
@@ -167,9 +161,7 @@ import axios from "axios";
 			   } = JSON.parse(textResponse.data);
 			   return accessToken
 		   }catch (error) {
-		   	localStorage.setItem('access_token','');
-		   	debugger;
-
+		   	localStorage.setItem(GIT_AUTH_CODE_KEY,'');
 		   }
 	   }
 

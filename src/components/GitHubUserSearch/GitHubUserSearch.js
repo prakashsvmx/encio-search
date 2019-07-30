@@ -12,22 +12,62 @@ import {
     SearchView
 } from 'components/StyledComponents/StyledComponents';
 import GitAuthUtils from 'service/GitAuthUtils';
+import { GIT_AUTH_CODE_KEY } from 'utils/Constants';
 
 class GitHubUserSearch extends React.PureComponent {
     state = {
         lookupLocation: 'Kyiv',
+        isAuthenticated:false,
     };
 
     componentDidMount() {
-        // this.getApiResult();
+       // this.getApiResult();
         const authCode = GitAuthUtils.getUrlParam('code','');
         if(!authCode){
             GitAuthUtils.authorizeGitHub();
         } else {
-            localStorage.setItem('git_auth_code', authCode);
+            localStorage.setItem(GIT_AUTH_CODE_KEY, authCode);
+            this.setState({
+                isAuthenticated: true,
+            });
         }
 
+        window.addEventListener('storage', this.onAuthCodeChange, false);
+
+
     }
+    componentWillUnmount () {
+        window.removeEventListener('storage', this.onAuthCodeChange, false);
+    }
+
+    onAuthCodeChange = (
+      {
+        key,         // name of the property set, changed etc.
+        oldValue,     // old value of property before change
+        newValue,
+        }
+    ) => {
+
+
+        if(key ===GIT_AUTH_CODE_KEY && newValue && oldValue !== newValue){
+
+                this.setState({
+                    isAuthenticated: true,
+                })
+            }else {
+                this.setState({
+                    isAuthenticated: false,
+                }, () => {
+                    const uri = window.location.toString();
+                    let clean_uri = uri;
+                    if (uri.indexOf("?") > 0) {
+                        clean_uri = uri.substring(0, uri.indexOf("?"));
+                    }
+                    window.location.replace(clean_uri);
+                });
+            }
+
+        }
 
 
     getApiResult = () => {
@@ -66,6 +106,7 @@ class GitHubUserSearch extends React.PureComponent {
 
         const {
             lookupLocation,
+            isAuthenticated,
         } = this.state;
 
         const {
@@ -80,7 +121,7 @@ class GitHubUserSearch extends React.PureComponent {
             }
         } = this.props;
 
-        const isAuthorized = localStorage.getItem('git_auth_code');
+        const isAuthorized = isAuthenticated;
 
         return (
             <SearchView>
@@ -93,6 +134,9 @@ class GitHubUserSearch extends React.PureComponent {
 
                 {isAuthorized && (
                   <>
+                  <CenteredContainer>
+                      <H4>Github User Search</H4>
+                  </CenteredContainer>
                     <SearchBar>
                         <Input type="text" placeholder="enter a location" value={lookupLocation} disabled={apiDataLoading}
                                onChange={this.updateSearchText}></Input>
@@ -104,7 +148,6 @@ class GitHubUserSearch extends React.PureComponent {
                     <SearchResultsView>
                         <List isLoading={apiDataLoading} listItems={userList}/>
                     </SearchResultsView>
-
                   </>
                 )
                 }
