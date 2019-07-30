@@ -11,6 +11,7 @@ import {
     SearchResultsView,
     SearchView
 } from 'components/StyledComponents/StyledComponents';
+import GitAuthUtils from 'service/GitAuthUtils';
 
 class GitHubUserSearch extends React.PureComponent {
     state = {
@@ -18,8 +19,16 @@ class GitHubUserSearch extends React.PureComponent {
     };
 
     componentDidMount() {
-        this.getApiResult();
+        // this.getApiResult();
+        const authCode = GitAuthUtils.getUrlParam('code','');
+        if(!authCode){
+            GitAuthUtils.authorizeGitHub();
+        } else {
+            localStorage.setItem('git_auth_code', authCode);
+        }
+
     }
+
 
     getApiResult = () => {
 
@@ -52,6 +61,7 @@ class GitHubUserSearch extends React.PureComponent {
 
     }
 
+
     render() {
 
         const {
@@ -70,22 +80,34 @@ class GitHubUserSearch extends React.PureComponent {
             }
         } = this.props;
 
+        const isAuthorized = localStorage.getItem('git_auth_code');
+
         return (
             <SearchView>
-                <CenteredContainer>
-                    <H4> GitHub User Search</H4>
-                </CenteredContainer>
-                <SearchBar>
-                    <Input type="text" placeholder="enter a location" value={lookupLocation} disabled={apiDataLoading}
-                           onChange={this.updateSearchText}></Input>
-                    <Button onClick={this.getApiResult} disabled={apiDataLoading}>Search</Button>
-                </SearchBar>
-                {(success === false) && <ErrorMessage>Error: {message}</ErrorMessage>}
-                <InfoMessage>{totalCount > 0 && !apiDataLoading ? (`displaying ${currentPage * 10} of ${totalCount} users.`) : ''} </InfoMessage>
 
-                <SearchResultsView>
-                    <List isLoading={apiDataLoading} listItems={userList}/>
-                </SearchResultsView>
+               <CenteredContainer>
+                   {!isAuthorized &&
+                        <Button onClick={this.authorizeGitHub}>Login with GitHub</Button>
+                   }
+                    </CenteredContainer>
+
+                {isAuthorized && (
+                  <>
+                    <SearchBar>
+                        <Input type="text" placeholder="enter a location" value={lookupLocation} disabled={apiDataLoading}
+                               onChange={this.updateSearchText}></Input>
+                        <Button onClick={this.getApiResult} disabled={apiDataLoading}>Search</Button>
+                    </SearchBar>
+                    {(success === false) && <ErrorMessage>Error: {message}</ErrorMessage>}
+                    <InfoMessage>{totalCount > 0 && !apiDataLoading ? (`displaying ${currentPage * 10} of ${totalCount} users.`) : ''} </InfoMessage>
+
+                    <SearchResultsView>
+                        <List isLoading={apiDataLoading} listItems={userList}/>
+                    </SearchResultsView>
+
+                  </>
+                )
+                }
 
             </SearchView>
         )

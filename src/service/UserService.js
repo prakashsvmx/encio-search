@@ -3,14 +3,37 @@ import axios from "axios";
  class UserService {
 
     static async getGitUsers({searchText}) {
+
+    	const accessToken = await  UserService.getAuthToken();
+
+	    let userDetails=''
         try {
+
+        	if(!accessToken ){
+		        userDetails = {
+			        success: false,
+			        totalCount: 0,
+			        userList: [],
+			        isInComplete: false,
+			        message: 'Invalid Token',
+		        };
+
+		        const uri = window.location.toString();
+		        let clean_uri = uri;
+		        if (uri.indexOf("?") > 0) {
+			        clean_uri = uri.substring(0, uri.indexOf("?"));
+		        }
+		        window.location.replace(clean_uri);
+
+		        return  userDetails;
+	        }
             const userResponse = await axios({
                 method: "get",
                 url: `https://api.github.com/search/users?q=+location:${searchText}&sort=stars&order=asc&page=1&per_page=10`,
                 // url: `https://api.github.com/search/hello?124`, to simulate Errors .
                 headers: {
                     //Authorization: `Bearer aa424f6fcf3d631e3d2832c9220dcfa6afb74473`,
-                    Authorization: `Bearer 150b1d0fcf2ced16a9c8f05fc0eff556438b4ee2`,
+                    Authorization: `token ${accessToken}`,
                     "Content-Type": "application/json"
                 }
             });
@@ -58,7 +81,7 @@ import axios from "axios";
                     email,
                 }
             });
-            const userDetails = {
+            userDetails = {
                 success: true,
                 totalCount,
                 userList: formattedData,
@@ -69,7 +92,7 @@ import axios from "axios";
             return userDetails;
 
         } catch (err) {
-            const userDetails = {
+            userDetails = {
                 success: false,
                 totalCount: 0,
                 userList: [],
@@ -112,6 +135,45 @@ import axios from "axios";
         }
 
     }
+
+
+    static async getAuthToken (){
+
+	   const authCode = localStorage.getItem('git_auth_code');
+
+	   if(authCode) {
+		   let data = new FormData()
+		   data.append('client_id', 'c8d91cbd3f6ca1bd65bc');
+		   data.append('client_secret', '69ae9024e06499f358022d8a341ae73afcfdb248');
+		   data.append('code', authCode);
+
+		   try {
+			   const textResponse = await axios({
+				   method: "post",
+				   headers: {
+						   'Content-Type': 'application/json',
+						   'Accept': 'application/json'
+				   },
+				   url: `https://cors-anywhere.herokuapp.com/https://github.com/login/oauth/access_token`,
+
+				   data: data,
+				   transformResponse: [(data) => {
+				   	return data;
+				   }]
+			   });
+
+			   const {
+				   access_token: accessToken ='',
+			   } = JSON.parse(textResponse.data);
+			   return accessToken
+		   }catch (error) {
+		   	localStorage.setItem('access_token','');
+		   	debugger;
+
+		   }
+	   }
+
+     }
 
 }
 
