@@ -98,8 +98,9 @@ import { GIT_AUTH_CODE_KEY } from 'utils/Constants';
         }
     }
 
-    static getUserDetails(userConfig) {
+    static getUserDetails(userConfig ) {
 
+        const accessToken = localStorage.getItem('git_access_token');
         const {
             url: userDetailsUrl,
         } = userConfig;
@@ -107,15 +108,12 @@ import { GIT_AUTH_CODE_KEY } from 'utils/Constants';
         return axios({
             method: "get",
             url: userDetailsUrl,
-            headers: {
-                Authorization: `Bearer c4dbea732fe41bbee4f8e452772ce0a44294285f`,
-                "Content-Type": "application/json"
-            },
-            auth: {
-                user: 'c4dbea732fe41bbee4f8e452772ce0a44294285f',
-                pass: 'x-oauth-basic',
-                sendImmediately: true
-            }
+
+                headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                    Authorization: `token ${accessToken}`,
+             },
         });
     }
 
@@ -134,8 +132,12 @@ import { GIT_AUTH_CODE_KEY } from 'utils/Constants';
     static async getAuthToken (){
 
 	   const authCode = localStorage.getItem(GIT_AUTH_CODE_KEY);
+        const accessToken = localStorage.getItem('git_access_token')
 
 	   if(authCode) {
+           if(accessToken){
+               return accessToken;
+           }
 		   let data = new FormData()
 		   data.append('client_id', 'c8d91cbd3f6ca1bd65bc');
 		   data.append('client_secret', '69ae9024e06499f358022d8a341ae73afcfdb248');
@@ -159,9 +161,11 @@ import { GIT_AUTH_CODE_KEY } from 'utils/Constants';
 			   const {
 				   access_token: accessToken ='',
 			   } = JSON.parse(textResponse.data);
+			   localStorage.setItem('git_access_token', accessToken);
 			   return accessToken
 		   }catch (error) {
 		   	localStorage.setItem(GIT_AUTH_CODE_KEY,'');
+		   	localStorage.setItem('git_access_token','');
 		   }
 	   }
 

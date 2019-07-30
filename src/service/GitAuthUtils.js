@@ -7,7 +7,7 @@ export default  class GitAuthUtils {
 
 
 	static authorizeGitHub = () => {
-		window.location='https://github.com/login/oauth/authorize?client_id=c8d91cbd3f6ca1bd65bc&allow_signup=true&scope=user,repo&redirect_uri=http://localhost:3000/index.html';
+		window.location='https://github.com/login/oauth/authorize?client_id=c8d91cbd3f6ca1bd65bc&allow_signup=true&scope=user,repo&redirect_uri=https://encio-search.herokuapp.com/index.html';
 	}
 
 	static  getUrlVars =()=>{
